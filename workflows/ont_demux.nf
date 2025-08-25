@@ -36,7 +36,8 @@ workflow ONT_DEMUX {
     // Run basecalling with (optional) integrated demultiplexing
     DORADO_BASECALLER(
         ch_demux,
-        model
+        model,
+        params.duplex
     )
     ch_versions = ch_versions.mix(DORADO_BASECALLER.out.versions)
 

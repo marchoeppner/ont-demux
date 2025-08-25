@@ -8,6 +8,7 @@ process DORADO_BASECALLER {
     input:
     tuple val(meta), path(pod5), val(samplesheet)
     val(model)
+    val(duplex)
 
     output:
     tuple val(meta), path("bam_pass"), emit: called
@@ -17,9 +18,10 @@ process DORADO_BASECALLER {
 
     def args = task.ext.args ?: ''
     def options = samplesheet ? "--sample-sheet $samplesheet" : ""
+    def mode = duplex ? "duplex" : "basecaller"
 
     """
-    dorado basecaller \
+    dorado $mode \
     $model \
     $pod5 \
     --models-directory \$DRD_MODELS_PATH \

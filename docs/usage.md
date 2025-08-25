@@ -49,7 +49,7 @@ where my_config is a configuration for your local system, hosted at https://gith
 If you are running this pipeline in a production setting, you will want to lock the pipeline to a specific version. This is natively supported through nextflow with the `-r` argument:
 
 ```bash
-nextflow run marchoeppner/THIS_PIPELINE -profile my_profile -r 1.0 <other options here>
+nextflow run marchoeppner/ont-demux -profile my_profile -r 1.0 <other options here>
 ```
 
 The `-r` option specifies a github [release tag](https://github.com/marchoeppner/THIS_PIPELINE/releases) or branch, so could also point to `main` for the very latest code release. Please note that every major release of this pipeline (1.0, 2.0 etc) comes with a new reference data set, which has the be [installed](installation.md) separately.
@@ -57,6 +57,14 @@ The `-r` option specifies a github [release tag](https://github.com/marchoeppner
 ## Options
 
 The pipeline exposes minimal options. These are:
+
+### `--dorado_options` [ default = null ]
+
+Any non-standard options you may wish to pass to Dorado. By default, this option is set to null and Dorado runs with all-default settings. Available options can be found [here](https://software-docs.nanoporetech.com/dorado/1.1.1/basecaller/simplex/).
+
+### `--duplex` [ default = false]
+
+Peform basecalling in duplex rather than simplex mode (only when applicable to your data!). This option is currently untested. 
 
 ### `--kit` [ default = null]
 
@@ -98,6 +106,17 @@ Accuracy refers to the overall basecalling accuracy and is divided into three ca
 - super accuracy (SUP): Very high accuracy, but very slow speed (only to be used on a GPU!)
 
 If you need the absolute best accuracy (i.e. when analysing variants, or reconstructing bacterial genomes for epidemiological analyses), use SUP. Else, HAC is usually fine. For most users, the most recent version of the model is preferrable - unless you need your base-called data to be compatible with older data sets.
+
+If you want to additionally perform detection of modified bases, you can add these to your model call like so:
+
+```bash
+nextflow run marchoeppner/ont-demux -profile singularity --input path/to/pod5 \\
+--run_name demux \
+--model 'hac@v5.2.0,5mC' \
+--kit SQK-RBK114-24
+```
+
+For additional options, see [here](https://software-docs.nanoporetech.com/dorado/1.1.1/basecaller/simplex/#adding-modified-bases).
 
 ### `--samplesheet` [ default = null]
 

@@ -43,6 +43,14 @@
           "type": "string",
           "description": "Library kit used for this run"
         },
+        "dorado_options": {
+          "type": "string",
+          "description": "Custom options to pass to dorado"
+        },
+        "duplex": {
+          "type": "boolean",
+          "description": "Perform basecalilng in duplex mode"
+        },
         "model": {
           "type": "string",
           "description": "The basecalling model to use"
@@ -62,7 +70,7 @@
           "hidden": true
         }
       },
-      "required": ["run_name", "kit", "model"]
+      "required": ["kit", "model", "run_name"]
     }
   },
   "allOf": [
