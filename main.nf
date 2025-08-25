@@ -2,30 +2,26 @@
 
 nextflow.enable.dsl = 2
 
-// TODO: Update this block with a description and the name of the pipeline
 /**
 ===============================
-Pipeline
+ONT demux pipeline Pipeline
 ===============================
 
-This Pipeline performs ....
+This Pipeline performs basecalling and demultiplexing with Dorado
 
 ### Homepage / git
-git@github.com:marchoeppner/pipeline.git
+git@github.com:marchoeppner/ont-demux.git
 
 **/
 
 // Pipeline version
 params.version = workflow.manifest.version
 
-// TODO: Rename this to something matching this pipeline, e.g. "AMPLICONS"
-include { MAIN }                from './workflows/main'
+include { ONT_DEMUX }           from './workflows/ont_demux'
 include { PIPELINE_COMPLETION } from './subworkflows/pipeline_completion'
 include { paramsSummaryLog }    from 'plugin/nf-schema'
 
 workflow {
-
-    def summary = [:]
 
     multiqc_report = Channel.from([])
     if (!workflow.containerEngine) {
@@ -33,16 +29,14 @@ workflow {
     }
 
     WorkflowMain.initialise(workflow, params, log)
-    // TODO: Rename this and the file under lib/ to something matching this pipeline (e.g. WorkflowAmplicons)
     WorkflowPipeline.initialise(params, log)
 
     // Print summary of supplied parameters
     log.info paramsSummaryLog(workflow)
 
-    // TODO: Rename to something matching this pipeline (see above)
-    MAIN()
+    ONT_DEMUX()
 
-    multiqc_report = multiqc_report.mix(MAIN.out.qc).toList()
+    multiqc_report = multiqc_report.mix(ONT_DEMUX.out.qc).toList()
     
     // Reporting worfklow
     PIPELINE_COMPLETION()

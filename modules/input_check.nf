@@ -7,27 +7,38 @@ workflow INPUT_CHECK {
     samplesheet // file: /path/to/samplesheet.csv
 
     main:
-    samplesheet
-        .splitCsv(header:true, sep:'\t')
-        .map { row -> fastq_channel(row) }
-        .set { reads }
-
+    samplesheet.map { m, s -> s}
+        .splitCsv(header:true, sep:',')
+        .map { row -> check_entry(row) }
+        .set { meta }
     emit:
-    reads // channel: [ val(meta), [ reads ] ]
+    samplesheet = samplesheet // channel: [ val(meta), [ reads ] ]
+    meta
 }
 
-// Function to get list of [ meta, [ fastq_1, fastq_2 ] ]
-def fastq_channel(LinkedHashMap row) {
-    def meta = [:]
-    meta.sample_id    = row.patient_id
+def check_entry(LinkedHashMap row) {
 
-    def array = []
-    if (!file(row.R1).exists()) {
-        exit 1, "ERROR: Please check input samplesheet -> Read 1 FastQ file does not exist!\n${row.R1}"
+    // experiment_id,kit,flow_cell_id,sample_id,flow_cell_product_code,alias,barcode
+    def meta = [:]
+
+    if (!row.experiment_id) {
+        exit 1, "Samplesheet error - an experiment id is required"
+        
     }
-    if (!file(row.R2).exists()) {
-        exit 1, "ERROR: Please check input samplesheet -> Read 2 FastQ file does not exist!\n${row.R2}"
+    if (!row.kit) {
+        exit 1, "Samplesheet error - a kit is required"
     }
-    array = [ meta, [ file(row.R1), file(row.R2) ] ]
-    return array
+    if (!row.barcode) {
+        exit 1, "Samplesheet error - a barcode is required"
+    }
+    
+    meta.experiment_id = row.experiment_id
+    meta.sample_id = row.alias
+    meta.alias = row.alias
+    meta.kit = row.kit
+    meta.flow_cell_id = row.flow_cell_id
+    meta.flow_cell_product_code = row.flow_cell_product_code
+    meta.barcode = row.barcode
+
+    return meta
 }
