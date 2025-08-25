@@ -62,7 +62,7 @@ workflow ONT_DEMUX {
     /* 
     Depending on whether a sample sheet was used, we now
     have either an extended meta hash or null - and for null,
-    we need a meta hash with at least a sample_id
+    we need a meta hash with at least a sample_id ( = the barcode)
     */
     ch_bams_by_meta.with_meta.map { bc, meta, bam, ameta ->
         [ ameta, bam ]
