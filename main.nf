@@ -25,7 +25,8 @@ workflow {
 
     multiqc_report = Channel.from([])
     if (!workflow.containerEngine) {
-        log.info "\033[1;31mRunning with Conda is not recommended in production!\033[0m\n\033[0;31mConda environments are not guaranteed to be reproducible - for a discussion, see https://pubmed.ncbi.nlm.nih.gov/29953862/.\033[0m"
+        log.info "\033[1;31mConda is not currently supported.\033[0m"
+        System.exit(1)
     }
 
     WorkflowMain.initialise(workflow, params, log)

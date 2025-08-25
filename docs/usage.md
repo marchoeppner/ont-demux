@@ -1,10 +1,22 @@
 # Usage information
 
+[Hardware requirements](#hardware-requirements)
+
 [Basic execution](#basic-execution)
 
 [Pipeline version](#specifying-pipeline-version)
 
 [Resources](#resources)
+
+## Hardware requirements
+
+Nanopore basecalling theoretically runs on a wide range of hardware; just not necessarily well. For optimal performance, the following minium specs are recommended:
+
+- Intel i7 or i9 or AMD Ryzen 7/9; else a "professional" CPU such as Intel Xeon or AMD Epyc
+- 16 GB or Ram (preferrably >= 32GB)
+- A fast storage system for the pipeline to write to (local SSD, or fast network share when running on a cluster) with several hundred GB of free space
+- A dedicated, up-to-date GPU
+  - Ampere and Ada Lovelace architectures strongly preferred, with at least 8G of Ram (RTX 4070 or above should work fine for MinION flow cells)
 
 ## Basic execution
 
