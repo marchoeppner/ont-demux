@@ -2,7 +2,9 @@
 include { INPUT_CHECK }                 from '../modules/input_check'
 include { DORADO_BASECALLER }           from './../modules/dorado/basecaller'
 include { SAMTOOLS_FASTQ }              from './../modules/samtools/fastq'
+include { DORADO_SUMMARY }              from './../modules/dorado/summary'
 include { MULTIQC }                     from './../modules/multiqc/main'
+include { NANOPLOT }                    from './../modules/nanoplot'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from './../modules/custom/dumpsoftwareversions'
 
 
@@ -75,11 +77,23 @@ workflow ONT_DEMUX {
         [ meta, bam ]
     }.set { ch_bams_without_sample }
 
+    ch_all_bams = ch_bams_with_sample.mix(ch_bams_without_sample)
     // Convert BAM to Fastq for downstream processing
     SAMTOOLS_FASTQ(
-        ch_bams_with_sample.mix(ch_bams_without_sample)
+        ch_all_bams
     )
     ch_versions = ch_versions.mix(SAMTOOLS_FASTQ.out.versions)
+
+    DORADO_SUMMARY(
+        ch_all_bams
+    )
+    ch_versions = ch_versions.mix(DORADO_SUMMARY.out.versions)
+    
+    NANOPLOT(
+        DORADO_SUMMARY.out.txt
+    )
+    ch_versions = ch_versions.mix(NANOPLOT.out.versions)
+    multiqc_files = multiqc_files.mix(NANOPLOT.out.txt.map {m,t -> t})
 
     CUSTOM_DUMPSOFTWAREVERSIONS(
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
