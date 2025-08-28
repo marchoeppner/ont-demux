@@ -25,7 +25,7 @@ workflow {
 
     multiqc_report = Channel.from([])
     if (!workflow.containerEngine) {
-        log.info "\033[1;31mConda is not currently supported.\033[0m"
+        log.info "\033[1;31mRunning with Conda is not currently supported.\033[0m"
         System.exit(1)
     }
 
