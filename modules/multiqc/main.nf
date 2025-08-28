@@ -7,8 +7,8 @@ process MULTIQC {
 
     input:
     path('*')
-    path(config)
-    path(logo)
+    path(multiqc_config)
+    path(multiqc_logo)
 
     output:
     path('*multiqc_report.html'), emit: html
@@ -17,10 +17,15 @@ process MULTIQC {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: ''
+    def config = multiqc_config ? "--config $multiqc_config" : ''
+    def logo = multiqc_logo ? "--cl-config 'custom_logo: \"${multiqc_logo}\"'" : ''
 
     """
-
-    multiqc -n ${prefix}_multiqc_report $args .
+    multiqc \\
+    -n ${prefix}_multiqc_report \\
+    $config \\
+    $logo \\
+    $args .
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
