@@ -5,16 +5,7 @@
 <details markdown=1>
 <summary>reports</summary>
 
-Add information here
-
-</details>
-
-## Quality control
-
-<details markdown=1>
-<summary>MultiQC</summary>
-
-- MultiQC/`name_of_pipeline_run`_multiqc_report.html: A graphical and interactive report of various QC steps and results
+The results of the basecalling and demultiplexing are summarized in a MultiQC report under `results/reports`.
 
 </details>
 

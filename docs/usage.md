@@ -142,7 +142,14 @@ Listeria_Test,SQK-RBK114-24,FBA71669,Listeria_Test01,FLO-MIN114,L05,barcode03
 Listeria_Test,SQK-RBK114-24,FBA71669,Listeria_Test01,FLO-MIN114,L06,barcode04
 ```
 
-The samples are then named after the alias matched to each barcode. 
+The samples are then named after the alias matched to each barcode. Currently, most columns are optional (but recommended for data management purposes). Strictly required are:
+
+- experiment_id
+- sample_id
+- alias
+- barcode
+
+The latter two are only needed when performing barcoded sequencing, of course. 
 
 **Please note** - the experiment_id has to match the name you gave your run in MinKNOW. Else no matching between barcodes and aliases can occur. If you are unsure about the name you gave to your run, you can use the following command line call (with the pod5 package installed, e.g. via pip or conda):
 

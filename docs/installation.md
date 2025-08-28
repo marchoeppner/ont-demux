@@ -4,7 +4,7 @@
 
 Nextflow is a highly portable pipeline engine. Please see the official [installation guide](https://www.nextflow.io/docs/latest/getstarted.html#installation) to learn how to set it up.
 
-This pipeline expects Nextflow version 25.04.2, available [here](https://github.com/nextflow-io/nextflow/releases/tag/v23.10.1).
+This pipeline expects Nextflow version 25.04.2, available [here](https://github.com/nextflow-io/nextflow/releases/tag/v25.04.5).
 
 ## Software provisioning
 
@@ -43,4 +43,4 @@ process {
 }
 ```
 
-This would then use a Slurm resource manager, the partition all - and require all the jobs with the label 'gpu' (i.e. Dorado base calling) to run on nodes that have one GPU available. You may also be able to use the slurm option `--constraint` for this; your mileage may vary depending on resource manager and overall cluster configuration. 
+This example would then use the Slurm resource manager, the partition 'all' - and require all the jobs with the label 'gpu' (i.e. Dorado basecalling and summary) to run on nodes that have one GPU available. You may also be able to use the slurm option `--constraint` for this; your mileage may vary depending on resource manager and overall cluster configuration. 
