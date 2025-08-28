@@ -1,4 +1,4 @@
-title: "Pipeline report"
+title: "Ont-demux Pipeline report"
 subtitle: "Best-practice workflow for ONT basecalling and demultiplexing"
 custom_logo: "pipelinelogo.png"
 custom_logo_title: "ONT basecalling"
@@ -13,7 +13,7 @@ extra_fn_clean_exts:
     - .pass
 
 report_comment: >
-    This report has been generated automatically by EDIT_IN_conf_multiqc_config.yaml.
+    This report has been generated automatically by marchoeppner/ont-demux.
     For help interpreting the outputs, please see: https://github.com/marchoeppner/ont-demux
 report_header_info:
     - Contact E-mail: "mphoeppner@gmail.com"
