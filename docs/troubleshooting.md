@@ -12,4 +12,6 @@ If this is insufficient for your setup, you may not be running with a (recent-en
 
 As mentioned in the relevant part of the usage information, the sample sheet has to have a column `experiment_id`, which must mach the `experiment_name` of your run. 
 
+## The pipeline crashes when trying to pull the Dorado container
 
+Yes, the Dorado container is pretty big (> 9 GB). Depending on your internet connection, Nextflow may decide to kill the process if it takes too long. You can check the error message and simply copy/paste the command into the command line and let the pull run outside of Nextflow until it completes. And then just resume your pipeline run. 
