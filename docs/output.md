@@ -1,11 +1,25 @@
 # Outputs 
 
+## Results
+
+Results are divided into two types:
+
+- Basecalled (and demultiplexed) BAM files: `results/bam_pass`
+- Converted (and re-named) FastQ files: `results/fastq`
+
+If a samplesheet was used, the barcoded BAM files will include the sample alias in their name. Th FastQ files are then named only
+after the sample alias.
+
 ## Reports
 
 <details markdown=1>
 <summary>reports</summary>
 
 The results of the basecalling and demultiplexing are summarized in a MultiQC report under `results/reports`.
+
+In addition, there is a folder for each sample containing the NanoStat outputs under `results/sample/sampleA/nanostat`
+
+![multiqc](../images/ont_demux_multiqc.png)
 
 </details>
 
