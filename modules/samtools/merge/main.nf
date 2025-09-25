@@ -21,7 +21,6 @@ process SAMTOOLS_MERGE {
     def prefix = task.ext.prefix ?: meta.sample_id
 
     merged_bam = prefix + '-merged.bam'
-    merged_bam_index = merged_bam + '.bai'
 
     """
     samtools merge $args -@ 4 $merged_bam ${aligned_bam_list.join(' ')}
