@@ -173,7 +173,7 @@ For example, to skip all trimming, run with:
 
 ```BASH
 nextflow run marchoeppner/ont-demux \\
--r 0.3.0 \\
+-r 0.3.1 \\
 -profile singularity \\
 --input /path/to/pod5 \\
 --samplesheet samples.csv \\

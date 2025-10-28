@@ -1,5 +1,5 @@
 // Modules
-include { INPUT_CHECK }                 from '../modules/input_check'
+include { INPUT_CHECK }                 from './../modules/input_check'
 include { DORADO_BASECALLER }           from './../modules/dorado/basecaller'
 include { SAMTOOLS_FASTQ }              from './../modules/samtools/fastq'
 include { DORADO_SUMMARY }              from './../modules/dorado/summary'
