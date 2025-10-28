@@ -159,6 +159,28 @@ The latter two are only needed when performing barcoded sequencing, of course.
 pod5 inspect debug /path/to/pod5 | grep experiment_name
 ```
 
+### `--trim` [ default = "all" ]
+
+Perform trimming of reads. By default, reads will be trimmed to remove adapters (and, if applicable, barcodes after demuxing). Valid options:
+
+| Option | Description |
+| ------ | ----------- |
+| all    | Remove all adapters and barcodes (default) |
+| adapters | Remove all adapters |
+| false | No trimming |
+
+For example, to skip all trimming, run with:
+
+```BASH
+nextflow run marchoeppner/ont-demux \\
+-r 0.3.0 \\
+-profile singularity \\
+--input /path/to/pod5 \\
+--samplesheet samples.csv \\
+--trim false \\
+--run_name Test_Demux
+```
+
 ### `--run_name` [ default = null ]
 
 A descriptive name for your run; mostly used for documentation purposes. 
