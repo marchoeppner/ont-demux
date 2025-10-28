@@ -12,7 +12,7 @@ class WorkflowPipeline {
             log.info 'Must provide a run_name (--run_name)'
             System.exit(1)
         }
-        if (!params.input && !params.build_references) {
+        if (!params.input) {
             log.info "Pipeline requires a pod5 directory as input (--input)"
             System.exit(1)
         }
@@ -27,6 +27,12 @@ class WorkflowPipeline {
         if (params.model && !params.model.contains("@")) {
             log.info "This does not look like a valid basecalling model - should be e.g. sup@v5.2.0"
             System.exit(1)
+        }
+        if (params.trim) {
+            if (!params.trim_options.contains(params.trim)) {
+                log.info "Not a valid trimming option - must be one of ${params.trim_options.join(',')}"
+                System.exit(1)
+            }
         }
     }
 

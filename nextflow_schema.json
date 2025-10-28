@@ -63,6 +63,11 @@
           "type": "string",
           "description": "A CSV formatted sample sheet"
         },
+        "trim": {
+          "type": "string",
+          "default": "all",
+          "description": "Type of trimming to perform (all, adapters, false)"
+        },
         "version": {
           "type": "boolean",
           "description": "Display version and exit.",
@@ -70,7 +75,7 @@
           "hidden": true
         }
       },
-      "required": ["kit", "model", "run_name"]
+      "required": ["kit", "model", "run_name", "trim"]
     }
   },
   "allOf": [
@@ -84,17 +89,17 @@
   "properties": {
     "logo": {
       "type": "string",
-      "default": "/home/mhoeppner/git/ont-demux/assets/pipelinelogo.png",
+      "default": "/home/marc/git/ont-demux/assets/pipelinelogo.png",
       "hidden": true
     },
     "multiqc_config": {
       "type": "string",
-      "default": "/home/mhoeppner/git/ont-demux/conf/multiqc_config.yaml",
+      "default": "/home/marc/git/ont-demux/conf/multiqc_config.yaml",
       "hidden": true
     },
     "multiqc_logo": {
       "type": "string",
-      "default": "/home/mhoeppner/git/ont-demux/assets/pipelinelogo.png",
+      "default": "/home/marc/git/ont-demux/assets/pipelinelogo.png",
       "hidden": true
     },
     "publish_dir_mode": {
@@ -105,6 +110,11 @@
     "custom_config_base": {
       "type": "string",
       "default": "https://raw.githubusercontent.com/bio-raum/nf-configs/main",
+      "hidden": true
+    },
+    "trim_options": {
+      "type": "string",
+      "default": "['all', 'adapters']",
       "hidden": true
     }
   }
