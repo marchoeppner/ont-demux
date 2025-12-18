@@ -23,22 +23,18 @@ def check_entry(LinkedHashMap row) {
 
     if (!row.experiment_id) {
         exit 1, "Samplesheet error - an experiment id is required"
-        
     }
     if (!row.kit) {
         exit 1, "Samplesheet error - a kit is required"
     }
-    if (!row.barcode) {
-        exit 1, "Samplesheet error - a barcode is required"
-    }
-    
+
     meta.experiment_id = row.experiment_id
-    meta.sample_id = row.alias
-    meta.alias = row.alias
-    meta.kit = row.kit
-    meta.flow_cell_id = row.flow_cell_id
-    meta.flow_cell_product_code = row.flow_cell_product_code
-    meta.barcode = row.barcode
+    meta.sample_id = row.alias ?: ""
+    meta.alias = row.alias ?: ""
+    meta.kit = row.kit 
+    meta.flow_cell_id = row.flow_cell_id ?: ""
+    meta.flow_cell_product_code = row.flow_cell_product_code ?: ""
+    meta.barcode = row.barcode ?: "all"
 
     return meta
 }
