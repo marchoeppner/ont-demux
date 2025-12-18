@@ -23,7 +23,7 @@ include { paramsSummaryLog }    from 'plugin/nf-schema'
 
 workflow {
 
-    multiqc_report = Channel.from([])
+    multiqc_report = channel.from([])
     if (!workflow.containerEngine) {
         log.info "\033[1;31mRunning with Conda is not currently supported.\033[0m"
         System.exit(1)

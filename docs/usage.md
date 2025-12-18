@@ -27,7 +27,8 @@ A basic execution of the pipeline looks as follows:
 a) Without a site-specific config file
 
 ```bash
-nextflow run marchoeppner/ont-demux -profile singularity --input path/to/pod5 \\
+nextflow run marchoeppner/ont-demux -profile singularity \\
+--input path/to/pod5 \\
 --run_name demux \
 --model hac@v5.2.0 \
 --kit SQK-RBK114-24
@@ -43,12 +44,13 @@ In this example, the pipeline will assume it runs on a single computer with the 
 
 `-profile podman` 
 
-Additional software provisioning tools as described [here](https://www.nextflow.io/docs/latest/container.html) may also work, but have not been tested by us. Please note that conda is **not** currently supported, because some of the software dependencies (namely Dorado) are not yet available as conda packages. 
+Additional software provisioning tools as described [here](https://www.nextflow.io/docs/latest/container.html) may also work, but have not been tested by us. Please note that conda is **not** currently supported, because some of the software dependencies (namely Dorado) are not yet available as conda package. 
 
 b) with a site-specific config file
 
 ```bash
-nextflow run marchoeppner/ont-demux -profile my_config --input path/to/pod5 \\
+nextflow run marchoeppner/ont-demux -profile my_config \\
+--input path/to/pod5 \\
 --run_name demux \
 --model hac@v5.2.0 \
 --kit SQK-RBK114-24
@@ -156,6 +158,28 @@ The latter two are only needed when performing barcoded sequencing, of course.
 
 ```bash
 pod5 inspect debug /path/to/pod5 | grep experiment_name
+```
+
+### `--trim` [ default = "all" ]
+
+Perform trimming of reads. By default, reads will be trimmed to remove adapters (and, if applicable, barcodes after demuxing). Valid options:
+
+| Option | Description |
+| ------ | ----------- |
+| all    | Remove all adapters and barcodes (default) |
+| adapters | Remove all adapters |
+| false | No trimming |
+
+For example, to skip all trimming, run with:
+
+```BASH
+nextflow run marchoeppner/ont-demux \\
+-r 0.3.1 \\
+-profile singularity \\
+--input /path/to/pod5 \\
+--samplesheet samples.csv \\
+--trim false \\
+--run_name Test_Demux
 ```
 
 ### `--run_name` [ default = null ]
