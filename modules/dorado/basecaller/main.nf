@@ -2,7 +2,7 @@ process DORADO_BASECALLER {
     label 'gpu'
     label 'basecalling'
 
-    container "ontresearch/dorado:mr661_shae423e761540b9d08b526a1eb32faf498f32e8f22"
+    container "ontresearch/dorado:shac8f356489fa8b44b31beba841b84d2879de2088e" // 1.4.0
 
     input:
     tuple val(meta), path(pod5), val(samplesheet)
