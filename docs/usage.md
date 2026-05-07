@@ -113,10 +113,11 @@ The Dorado basecalling model to use. Typical options include:
 |hac@v4.3.0 | HAC | 4.3.0 |
 |fast@v4.3.0 | FAST | 4.3.0 |
 
+More on models [here](https://software-docs.nanoporetech.com/dorado/1.1.1/models/models/)
 
 Accuracy refers to the overall basecalling accuracy and is divided into three categories: 
-- fast (FAST): Fastest algorithm, but poorest overall basecalling accuracy
-- high-accuracy (HAC): High accuracy, but slower speed
+- fast (FAST): Fastest algorithm, but poorest overall basecalling accuracy (only for screening)
+- high-accuracy (HAC): High accuracy, but slower speed (the typical default)
 - super accuracy (SUP): Very high accuracy, but very slow speed (only to be used on a GPU!)
 
 If you need the absolute best accuracy (i.e. when analysing variants, or reconstructing bacterial genomes for epidemiological analyses), use SUP. Else, HAC is usually fine. For most users, the most recent version of the model is preferrable - unless you need your base-called data to be compatible with older data sets.
@@ -173,7 +174,7 @@ For example, to skip all trimming, run with:
 
 ```BASH
 nextflow run marchoeppner/ont-demux \\
--r 0.3.0 \\
+-r 0.3.1 \\
 -profile singularity \\
 --input /path/to/pod5 \\
 --samplesheet samples.csv \\

@@ -1,5 +1,5 @@
 // Modules
-include { INPUT_CHECK }                 from '../modules/input_check'
+include { INPUT_CHECK }                 from './../modules/input_check'
 include { DORADO_BASECALLER }           from './../modules/dorado/basecaller'
 include { SAMTOOLS_FASTQ }              from './../modules/samtools/fastq'
 include { DORADO_SUMMARY }              from './../modules/dorado/summary'
@@ -86,23 +86,27 @@ workflow ONT_DEMUX {
     )
     ch_versions = ch_versions.mix(SAMTOOLS_FASTQ.out.versions)
 
+    // Read BAM file and compute summary
     DORADO_SUMMARY(
         ch_all_bams
     )
     ch_versions = ch_versions.mix(DORADO_SUMMARY.out.versions)
     
+    // Plot sample stats from Dorado summary output
     NANOPLOT(
         DORADO_SUMMARY.out.txt
     )
     ch_versions = ch_versions.mix(NANOPLOT.out.versions)
     multiqc_files = multiqc_files.mix(NANOPLOT.out.txt.map {m,t -> t})
 
+    // Collect all software versions
     CUSTOM_DUMPSOFTWAREVERSIONS(
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
 
     multiqc_files = multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml)
 
+    // Render MultiQC report
     MULTIQC(
         multiqc_files.collect(),
         ch_multiqc_config,

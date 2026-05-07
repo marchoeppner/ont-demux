@@ -1,7 +1,7 @@
 # Software used in this pipeline
 
 **Dorado**
-Version 1.1.0, [github](https://github.com/nanoporetech/dorado)
+Version 1.4.0, [github](https://github.com/nanoporetech/dorado)
 
 **MultiQC**
 Version 1.19, doi: 10.1093/bioinformatics/btw354, [PubMed](https://pubmed.ncbi.nlm.nih.gov/27312411/) [github](https://github.com/MultiQC/MultiQC)
