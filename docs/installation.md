@@ -4,7 +4,7 @@
 
 Nextflow is a highly portable pipeline engine. Please see the official [installation guide](https://www.nextflow.io/docs/latest/getstarted.html#installation) to learn how to set it up.
 
-This pipeline expects Nextflow version 25.04.2, available [here](https://github.com/nextflow-io/nextflow/releases/tag/v25.04.5).
+This pipeline expects Nextflow version 25.04.2, available [here](https://github.com/nextflow-io/nextflow/releases/tag/v25.04.5). Please note that ont-demux is not yet compatible with Nextflow version 26 or later. 
 
 ## Software provisioning
 

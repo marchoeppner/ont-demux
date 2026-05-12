@@ -53,10 +53,10 @@ workflow ONT_DEMUX {
 
     // Combine bams with the full metadata hash
     bams.map { m, bam ->
-        tuple(m.barcode,m,bam)
+        tuple(m.sample_id,m,bam)
     }.join(
         INPUT_CHECK.out.meta.map { m -> 
-            [ m.barcode, m]
+            [ m.sample_id, m]
         }, remainder: true
     ).branch { bc, meta, bam, ameta ->
         with_meta: ameta
@@ -68,14 +68,14 @@ workflow ONT_DEMUX {
     have either an extended meta hash or null - and for null,
     we need a meta hash with at least a sample_id ( = the barcode)
     */
-    ch_bams_by_meta.with_meta.map { bc, meta, bam, ameta ->
+    ch_bams_by_meta.with_meta.map { s, meta, bam, ameta ->
         [ ameta, bam ]
     }.set { ch_bams_with_sample }
 
-    ch_bams_by_meta.without_meta.map { bc, m, bam, ameta ->
+    ch_bams_by_meta.without_meta.map { s, m, bam, ameta ->
         def meta = [:]
-        meta.barcode = m.barcode
-        meta.sample_id = m.barcode
+        meta.barcode = m.sample_id
+        meta.sample_id = m.sample_id
         [ meta, bam ]
     }.set { ch_bams_without_sample }
 
@@ -123,11 +123,9 @@ def bams_from_calls(dir) {
     def bams = file("${dir}/**.bam")
     bams.each { b ->
         def meta = [:]
-        def barcode = "all"
-        if (b.toString().contains("barcode") || b.toString().contains("unclassified")) {
-            barcode = ( b.toString().split("/")[-2] )
-        }
-        meta.barcode = barcode 
+        def sample_id = ( b.toString().split("/")[-2] )
+
+        meta.sample_id = sample_id 
         data << [ meta, file(b)]
     }
 
