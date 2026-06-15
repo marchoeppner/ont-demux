@@ -1,4 +1,4 @@
-process DORADO_BASECALLER {
+process DORADO_CORRECT {
     label 'gpu'
     label 'basecalling'
 
@@ -6,30 +6,22 @@ process DORADO_BASECALLER {
     container "ontresearch/dorado:sha38b4ce849afa13eac8075f0b41cecd30799f169b" // 2.0.0
 
     input:
-    tuple val(meta), path(pod5), val(samplesheet)
-    val(model)
-    val(duplex)
-
+    tuple val(meta), path(fastq)
+    
     output:
-    tuple val(meta), path("bam_pass"), emit: called
+    tuple val(meta), path("*.fasta"), emit: corrected
     path('versions.yml'), emit: versions
 
     script:
 
     def args = task.ext.args ?: ''
-    def options = samplesheet ? "--sample-sheet $samplesheet" : ""
-    def mode = duplex ? "duplex" : "basecaller"
-
+    def prefix = task.ext.prefix ?: meta.sample_id
+    
     """
-    dorado $mode \
-    $model \
-    $pod5 \
-    --models-directory \$DRD_MODELS_PATH \
-    -o basecalling \
-    $options \
-    $args 
-
-    find ./ -name bam_pass -exec cp -R {} . \\;
+    dorado correct \
+    --model-path \$DRD_MODELS_PATH \
+    $fastq \
+    $args > ${prefix}.corrected.fasta
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

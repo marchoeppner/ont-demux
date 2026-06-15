@@ -103,6 +103,7 @@ The Dorado basecalling model to use. Typical options include:
 
 | Model | Accuracy | Version |
 | ----- | -------- | ------- |
+|hac@v6.0.0 | HAC | 6.0.0 |
 |sup@v5.2.0 | SUP | 5.2.0 |
 |hac@v5.2.0 | HAC | 5.2.0 |
 |fast@v5.2.0 | FAST | 5.2.0 |

@@ -12,19 +12,19 @@ workflow ONT_DEMUX {
 
     main:
 
-    pod5              = params.input            ? Channel.fromPath(params.input, checkIfExists: true).collect() : Channel.empty()
+    pod5              = params.input            ? channel.fromPath(params.input, checkIfExists: true).collect() : channel.empty()
     model             = params.model
-    ch_samplesheet    = params.samplesheet      ? Channel.fromPath(params.samplesheet, checkIfExists: true).map { s -> [ ["kit": params.kit], s]}.collect() : Channel.value( [["this": "bla"],null])
-    ch_multiqc_config = params.multiqc_config   ? Channel.fromPath(params.multiqc_config, checkIfExists: true).collect() : Channel.value([])
-    ch_multiqc_logo   = params.multiqc_logo     ? Channel.fromPath(params.multiqc_logo, checkIfExists: true).collect() : Channel.value([])
+    ch_samplesheet    = params.samplesheet      ? channel.fromPath(params.samplesheet, checkIfExists: true).map { s -> [ ["kit": params.kit], s]}.collect() : channel.value( [["this": "bla"],null])
+    ch_multiqc_config = params.multiqc_config   ? channel.fromPath(params.multiqc_config, checkIfExists: true).collect() : channel.value([])
+    ch_multiqc_logo   = params.multiqc_logo     ? channel.fromPath(params.multiqc_logo, checkIfExists: true).collect() : channel.value([])
 
-    pipeline_info = Channel.fromPath(dumpParametersToJSON(params.outdir)).collect()
+    pipeline_info = channel.fromPath(dumpParametersToJSON(params.outdir)).collect()
 
-    ch_versions = Channel.from([])
-    multiqc_files = Channel.from([])
+    ch_versions = channel.from([])
+    multiqc_files = channel.from([])
 
     // Check validity of samplesheet, if any
-    INPUT_CHECK(ch_samplesheet.filter { m,s -> s})
+    INPUT_CHECK(ch_samplesheet.filter { _m,s -> s})
 
     // Check if we have a samplesheet, else set null
     pod5.map { p ->
@@ -33,7 +33,7 @@ workflow ONT_DEMUX {
         [ meta, p ]
     }.join(
         INPUT_CHECK.out.samplesheet, remainder: true
-    ).filter { m, p, s ->
+    ).filter { _m, p, _s ->
         p
     }.set { ch_demux }
 
@@ -46,7 +46,7 @@ workflow ONT_DEMUX {
     ch_versions = ch_versions.mix(DORADO_BASECALLER.out.versions)
 
     // Get BAMs from basecalling output
-    DORADO_BASECALLER.out.called.map { m,d ->
+    DORADO_BASECALLER.out.called.map { _m,d ->
         bams_from_calls(d)
     }.flatMap { v -> v }
     .set { bams }
@@ -58,7 +58,7 @@ workflow ONT_DEMUX {
         INPUT_CHECK.out.meta.map { m -> 
             [ m.sample_id, m]
         }, remainder: true
-    ).branch { bc, meta, bam, ameta ->
+    ).branch { _bc, _meta, _bam, ameta ->
         with_meta: ameta
         without_meta: !ameta
     }.set  { ch_bams_by_meta }
@@ -68,11 +68,11 @@ workflow ONT_DEMUX {
     have either an extended meta hash or null - and for null,
     we need a meta hash with at least a sample_id ( = the barcode)
     */
-    ch_bams_by_meta.with_meta.map { s, meta, bam, ameta ->
+    ch_bams_by_meta.with_meta.map { _bc, _meta, bam, ameta ->
         [ ameta, bam ]
     }.set { ch_bams_with_sample }
 
-    ch_bams_by_meta.without_meta.map { s, m, bam, ameta ->
+    ch_bams_by_meta.without_meta.map { _bc, m, bam, _ameta ->
         def meta = [:]
         meta.barcode = m.sample_id
         meta.sample_id = m.sample_id
@@ -97,7 +97,7 @@ workflow ONT_DEMUX {
         DORADO_SUMMARY.out.txt
     )
     ch_versions = ch_versions.mix(NANOPLOT.out.versions)
-    multiqc_files = multiqc_files.mix(NANOPLOT.out.txt.map {m,t -> t})
+    multiqc_files = multiqc_files.mix(NANOPLOT.out.txt.map {_m,t -> t})
 
     // Collect all software versions
     CUSTOM_DUMPSOFTWAREVERSIONS(
