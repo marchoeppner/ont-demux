@@ -120,7 +120,7 @@ workflow ONT_DEMUX {
 // Custom function to turn a list of BAM files into a meta-data enabled channel
 def bams_from_calls(dir) {
     def data = []
-    def bams = file("${dir}/**.bam")
+    def bams = file("${dir}/**.*am")
     bams.each { b ->
         def meta = [:]
         def sample_id = ( b.toString().split("/")[-2] )
