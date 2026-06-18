@@ -36,6 +36,9 @@ workflow ONT_DEMUX {
     )
     ch_versions = ch_versions.mix(DORADO_BASECALLER.out.versions)
 
+    DORADO_BASECALLER.out.called.view()
+    ch_samplesheet.view()
+    
     if (params.samplesheet) {
         /* 
         Demultiplex basecalled reads - 
