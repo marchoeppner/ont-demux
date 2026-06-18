@@ -45,7 +45,7 @@ workflow ONT_DEMUX {
         */
         DORADO_DEMUX(
             DORADO_BASECALLER.out.called,
-            INPUT_CHECK.out.samplesheet.collect()
+            ch_samplesheet
         )
         ch_versions = ch_versions.mix(DORADO_DEMUX.out.versions)
         ch_demuxed = DORADO_DEMUX.out.demuxed
