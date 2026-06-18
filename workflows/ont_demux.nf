@@ -1,8 +1,9 @@
 // Modules
 include { INPUT_CHECK }                 from './../modules/input_check'
 include { DORADO_BASECALLER }           from './../modules/dorado/basecaller'
-include { SAMTOOLS_FASTQ }              from './../modules/samtools/fastq'
 include { DORADO_SUMMARY }              from './../modules/dorado/summary'
+include { DORADO_DEMUX }                from './../modules/dorado/demux'
+include { SAMTOOLS_FASTQ }              from './../modules/samtools/fastq'
 include { MULTIQC }                     from './../modules/multiqc/main'
 include { NANOPLOT }                    from './../modules/nanoplot'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from './../modules/custom/dumpsoftwareversions'
@@ -26,27 +27,33 @@ workflow ONT_DEMUX {
     // Check validity of samplesheet, if any
     INPUT_CHECK(ch_samplesheet.filter { _m,s -> s})
 
-    // Check if we have a samplesheet, else set null
-    pod5.map { p ->
-        def meta = [:]
-        meta.kit = params.kit
-        [ meta, p ]
-    }.join(
-        INPUT_CHECK.out.samplesheet, remainder: true
-    ).filter { _m, p, _s ->
-        p
-    }.set { ch_demux }
-
-    // Run basecalling with (optional) integrated demultiplexing
+    // Run basecalling 
     DORADO_BASECALLER(
-        ch_demux,
+        pod5,
         model,
         params.duplex
     )
     ch_versions = ch_versions.mix(DORADO_BASECALLER.out.versions)
 
+    if (params.samplesheet) {
+        /* 
+        Demultiplex basecalled reads - 
+        No separate trimming is performed as that may 
+        negatively affect demultiplexing. Adapters and sequencing primers
+        are removed together with the barcodes
+        */
+        DORADO_DEMUX(
+            DORADO_BASECALLER.out.called,
+            INPUT_CHECK.out.samplesheet.collect()
+        )
+        ch_versions = ch_versions.mix(DORADO_DEMUX.out.versions)
+        ch_demuxed = DORADO_DEMUX.out.demuxed
+    } else {
+        ch_demuxed = DORADO_BASECALLER.out.called
+    }
+
     // Get BAMs from basecalling output
-    DORADO_BASECALLER.out.called.map { _m,d ->
+    ch_demuxed.map { _m,d ->
         bams_from_calls(d)
     }.flatMap { v -> v }
     .set { bams }

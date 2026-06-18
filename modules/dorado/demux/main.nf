@@ -7,19 +7,21 @@ process DORADO_DEMUX {
 
     input:
     tuple val(meta), path(bam)
+    val(samplesheet)
 
     output:
-    tuple val(meta), path("demux/*.bam"), emit: demuxed
+    tuple val(meta), path("demux"), emit: demuxed
     path('versions.yml'), emit: versions
 
     script:
 
     def args = task.ext.args ?: ''
+    def options = samplesheet ? "--sample-sheet ${samplesheet}" : ""
 
     """
     dorado demux \
     --output-dir demux \
-    --no-classify \
+    $options \
     $args $bam
 
     cat <<-END_VERSIONS > versions.yml
