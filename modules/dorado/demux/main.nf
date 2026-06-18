@@ -6,11 +6,11 @@ process DORADO_DEMUX {
     container "ontresearch/dorado:sha38b4ce849afa13eac8075f0b41cecd30799f169b" // 2.0.0
 
     input:
-    tuple val(meta), path(bam)
+    path(bam)
     val(samplesheet)
 
     output:
-    tuple val(meta), path("demux"), emit: demuxed
+    path("demux"), emit: demuxed
     path('versions.yml'), emit: versions
 
     script:

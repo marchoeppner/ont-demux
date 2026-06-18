@@ -6,12 +6,12 @@ process DORADO_BASECALLER {
     container "ontresearch/dorado:sha38b4ce849afa13eac8075f0b41cecd30799f169b" // 2.0.0
 
     input:
-    tuple val(meta), path(pod5)
+    path(pod5)
     val(model)
     val(duplex)
 
     output:
-    tuple val(meta), path("**/*.bam"), emit: called
+    path("**/*.bam"), emit: called
     path('versions.yml'), emit: versions
 
     script:
