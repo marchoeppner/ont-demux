@@ -7,13 +7,13 @@ workflow INPUT_CHECK {
     samplesheet // file: /path/to/samplesheet.csv
 
     main:
-    samplesheet.map { m, s -> s}
+    samplesheet
         .splitCsv(header:true, sep:',')
         .map { row -> check_entry(row) }
         .set { meta }
     emit:
     samplesheet = samplesheet // channel: [ val(meta), [ reads ] ]
-    meta
+    meta = meta
 }
 
 def check_entry(LinkedHashMap row) {

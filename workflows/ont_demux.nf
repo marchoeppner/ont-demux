@@ -15,7 +15,8 @@ workflow ONT_DEMUX {
 
     pod5              = params.input            ? channel.fromPath(params.input, checkIfExists: true).collect() : channel.empty()
     model             = params.model
-    ch_samplesheet    = params.samplesheet      ? channel.fromPath(params.samplesheet, checkIfExists: true).map { s -> [ ["kit": params.kit], s]}.collect() : channel.value( [["this": "bla"],null])
+    ch_samplesheet    = params.samplesheet      ? channel.fromPath(params.samplesheet, checkIfExists: true) : channel.empty()
+    
     ch_multiqc_config = params.multiqc_config   ? channel.fromPath(params.multiqc_config, checkIfExists: true).collect() : channel.value([])
     ch_multiqc_logo   = params.multiqc_logo     ? channel.fromPath(params.multiqc_logo, checkIfExists: true).collect() : channel.value([])
 
