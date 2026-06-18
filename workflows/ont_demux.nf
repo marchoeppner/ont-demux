@@ -16,7 +16,7 @@ workflow ONT_DEMUX {
     pod5              = params.input            ? channel.fromPath(params.input, checkIfExists: true).collect() : channel.empty()
     model             = params.model
     ch_samplesheet    = params.samplesheet      ? channel.fromPath(params.samplesheet, checkIfExists: true) : channel.empty()
-    
+
     ch_multiqc_config = params.multiqc_config   ? channel.fromPath(params.multiqc_config, checkIfExists: true).collect() : channel.value([])
     ch_multiqc_logo   = params.multiqc_logo     ? channel.fromPath(params.multiqc_logo, checkIfExists: true).collect() : channel.value([])
 
@@ -26,7 +26,7 @@ workflow ONT_DEMUX {
     multiqc_files = channel.from([])
 
     // Check validity of samplesheet, if any
-    INPUT_CHECK(ch_samplesheet.filter { _m,s -> s})
+    INPUT_CHECK(ch_samplesheet)
 
     // Run basecalling 
     DORADO_BASECALLER(
