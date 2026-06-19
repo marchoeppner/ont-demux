@@ -1,4 +1,5 @@
 process DORADO_SUMMARY {
+   
     label 'gpu'
     label 'short_serial'
 

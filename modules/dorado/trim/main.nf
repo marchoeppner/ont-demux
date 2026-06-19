@@ -1,4 +1,4 @@
-process DORADO_BASECALLER {
+process DORADO_TRIM {
     label 'gpu'
     label 'basecalling'
 
@@ -6,29 +6,19 @@ process DORADO_BASECALLER {
     container "ontresearch/dorado:sha38b4ce849afa13eac8075f0b41cecd30799f169b" // 2.0.0
 
     input:
-    path(pod5)
-    val(model)
-    val(duplex)
+    tuple val(meta), path(bam, stageAs: "?/")
 
     output:
-    path("bam_pass/*.bam"), emit: bams
-    path("bam_pass/"), emit: called
+    tuple val(meta), path("*trimmed.bam"), emit: trimmed
     path('versions.yml'), emit: versions
 
     script:
 
     def args = task.ext.args ?: ''
-    def mode = duplex ? "duplex" : "basecaller"
-
+    def prefix = task.ext.prefix ?: meta.sample_id + ".trimmed"
     """
-    dorado $mode \
-    $model \
-    $pod5 \
-    --models-directory \$DRD_MODELS_PATH \
-    -o basecalling \
-    $args 
-
-    find ./ -name bam_pass -exec cp -R {} . \\;
+    dorado trim \
+    $args $bam > $prefix.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -1,0 +1,8 @@
+# 1.0.0
+
+First release of the pipeline, implementing the following workflow
+
+- Perform basecalling with optional in-line trimming and demultiplexing
+- Dorado version: 2.0.0
+- Splitting of basecalled BAM file into (per-sample) FastQ data
+- Nanopore QC using Nanoplot and MultiQC

@@ -149,6 +149,7 @@ Listeria_Test,SQK-RBK114-24,FBA71669,Listeria_Test01,FLO-MIN114,L06,barcode04
 The samples are then named after the alias matched to each barcode. Currently, most columns are optional (but recommended for data management purposes). Strictly required are:
 
 - experiment_id
+- flow_cell_id
 - sample_id
 - alias
 - barcode

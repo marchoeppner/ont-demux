@@ -1,11 +1,15 @@
 // Modules
 include { INPUT_CHECK }                 from './../modules/input_check'
 include { DORADO_BASECALLER }           from './../modules/dorado/basecaller'
-include { SAMTOOLS_FASTQ }              from './../modules/samtools/fastq'
 include { DORADO_SUMMARY }              from './../modules/dorado/summary'
+include { DORADO_DEMUX }                from './../modules/dorado/demux'
+include { SAMTOOLS_FASTQ }              from './../modules/samtools/fastq'
 include { MULTIQC }                     from './../modules/multiqc/main'
 include { NANOPLOT }                    from './../modules/nanoplot'
+include { MD5SUM as MD5SUM_BASECALL }   from './../modules/md5sum'
+include { MD5SUM as MD5SUM_DEMUX }      from './../modules/md5sum'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from './../modules/custom/dumpsoftwareversions'
+include { MD5SUM as MD5SUM_FASTQ }      from './../modules/md5sum'
 
 
 workflow ONT_DEMUX {
@@ -14,68 +18,91 @@ workflow ONT_DEMUX {
 
     pod5              = params.input            ? channel.fromPath(params.input, checkIfExists: true).collect() : channel.empty()
     model             = params.model
-    ch_samplesheet    = params.samplesheet      ? channel.fromPath(params.samplesheet, checkIfExists: true).map { s -> [ ["kit": params.kit], s]}.collect() : channel.value( [["this": "bla"],null])
+    ch_samplesheet    = params.samplesheet      ? channel.fromPath(params.samplesheet, checkIfExists: true).collect() : channel.empty()
+
     ch_multiqc_config = params.multiqc_config   ? channel.fromPath(params.multiqc_config, checkIfExists: true).collect() : channel.value([])
     ch_multiqc_logo   = params.multiqc_logo     ? channel.fromPath(params.multiqc_logo, checkIfExists: true).collect() : channel.value([])
 
     pipeline_info = channel.fromPath(dumpParametersToJSON(params.outdir)).collect()
 
+    ch_meta = channel.from([])
     ch_versions = channel.from([])
     multiqc_files = channel.from([])
 
     // Check validity of samplesheet, if any
-    INPUT_CHECK(ch_samplesheet.filter { _m,s -> s})
+    if (params.samplesheet) {
 
-    // Check if we have a samplesheet, else set null
-    pod5.map { p ->
-        def meta = [:]
-        meta.kit = params.kit
-        [ meta, p ]
-    }.join(
-        INPUT_CHECK.out.samplesheet, remainder: true
-    ).filter { _m, p, _s ->
-        p
-    }.set { ch_demux }
+        INPUT_CHECK(ch_samplesheet)
+        ch_meta = INPUT_CHECK.out.meta
+    } 
 
-    // Run basecalling with (optional) integrated demultiplexing
+    // Run basecalling 
     DORADO_BASECALLER(
-        ch_demux,
+        pod5,
         model,
         params.duplex
     )
     ch_versions = ch_versions.mix(DORADO_BASECALLER.out.versions)
 
+    // Generate md5sum for basecalled bam
+    DORADO_BASECALLER.out.bams.view()
+    MD5SUM_BASECALL(
+        DORADO_BASECALLER.out.bams
+    )
+
+    if (params.samplesheet) {
+        /* 
+        Demultiplex basecalled reads - 
+        No separate trimming is performed as that may 
+        negatively affect demultiplexing. Adapters and sequencing primers
+        are removed together with the barcodes
+        */
+        DORADO_DEMUX(
+            DORADO_BASECALLER.out.bams,
+            file(params.samplesheet)
+        )
+        ch_versions = ch_versions.mix(DORADO_DEMUX.out.versions)
+        ch_demuxed = DORADO_DEMUX.out.demuxed
+
+        MD5SUM_DEMUX(
+            DORADO_DEMUX.out.bams
+        )
+    } else {
+        ch_demuxed = DORADO_BASECALLER.out.called
+    }
+
     // Get BAMs from basecalling output
-    DORADO_BASECALLER.out.called.map { _m,d ->
+    ch_demuxed.map { d ->
         bams_from_calls(d)
     }.flatMap { v -> v }
     .set { bams }
 
     // Combine bams with the full metadata hash
     bams.map { m, bam ->
-        tuple(m.barcode,m,bam)
+        tuple(m.sample_id,m,bam)
     }.join(
-        INPUT_CHECK.out.meta.map { m -> 
-            [ m.barcode, m]
+        ch_meta.map { m -> 
+            [ m.sample_id, m]
         }, remainder: true
-    ).branch { _bc, _meta, _bam, ameta ->
+    ).branch { _s, _meta, _bam, ameta ->
         with_meta: ameta
         without_meta: !ameta
     }.set  { ch_bams_by_meta }
     
+    ch_bams_by_meta.without_meta.view()
     /* 
     Depending on whether a sample sheet was used, we now
     have either an extended meta hash or null - and for null,
     we need a meta hash with at least a sample_id ( = the barcode)
     */
-    ch_bams_by_meta.with_meta.map { _bc, _meta, bam, ameta ->
+    ch_bams_by_meta.with_meta.map { _s, _meta, bam, ameta ->
         [ ameta, bam ]
     }.set { ch_bams_with_sample }
 
-    ch_bams_by_meta.without_meta.map { _bc, m, bam, _ameta ->
+    ch_bams_by_meta.without_meta.map { _s, m, bam, _ameta ->
         def meta = [:]
-        meta.barcode = m.barcode
-        meta.sample_id = m.barcode
+        meta.barcode = m.sample_id
+        meta.sample_id = m.sample_id
         [ meta, bam ]
     }.set { ch_bams_without_sample }
 
@@ -85,6 +112,11 @@ workflow ONT_DEMUX {
         ch_all_bams
     )
     ch_versions = ch_versions.mix(SAMTOOLS_FASTQ.out.versions)
+
+    MD5SUM_FASTQ(
+        SAMTOOLS_FASTQ.out.fastq.map{_m,f -> f} 
+    )
+    ch_versions = ch_versions.mix(MD5SUM_FASTQ.out.versions)
 
     // Read BAM file and compute summary
     DORADO_SUMMARY(
@@ -120,14 +152,12 @@ workflow ONT_DEMUX {
 // Custom function to turn a list of BAM files into a meta-data enabled channel
 def bams_from_calls(dir) {
     def data = []
-    def bams = file("${dir}/**.bam")
+    def bams = file("${dir}/**.*am")
     bams.each { b ->
         def meta = [:]
-        def barcode = "all"
-        if (b.toString().contains("barcode") || b.toString().contains("unclassified")) {
-            barcode = ( b.toString().split("/")[-2] )
-        }
-        meta.barcode = barcode 
+        def sample_id = ( b.toString().split("/")[-2] )
+
+        meta.sample_id = sample_id 
         data << [ meta, file(b)]
     }
 
