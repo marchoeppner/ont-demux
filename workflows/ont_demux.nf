@@ -6,7 +6,10 @@ include { DORADO_DEMUX }                from './../modules/dorado/demux'
 include { SAMTOOLS_FASTQ }              from './../modules/samtools/fastq'
 include { MULTIQC }                     from './../modules/multiqc/main'
 include { NANOPLOT }                    from './../modules/nanoplot'
+include { MD5SUM as MD5SUM_BASECALL }   from './../modules/md5sum'
+include { MD5SUM as MD5SUM_DEMUX }      from './../modules/md5sum'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from './../modules/custom/dumpsoftwareversions'
+include { MD5SUM as MD5SUM_FASTQ }      from './../modules/md5sum'
 
 
 workflow ONT_DEMUX {
@@ -22,11 +25,16 @@ workflow ONT_DEMUX {
 
     pipeline_info = channel.fromPath(dumpParametersToJSON(params.outdir)).collect()
 
+    ch_meta = channel.from([])
     ch_versions = channel.from([])
     multiqc_files = channel.from([])
 
     // Check validity of samplesheet, if any
-    INPUT_CHECK(ch_samplesheet)
+    if (params.samplesheet) {
+
+        INPUT_CHECK(ch_samplesheet)
+        ch_meta = INPUT_CHECK.out.meta
+    } 
 
     // Run basecalling 
     DORADO_BASECALLER(
@@ -36,7 +44,11 @@ workflow ONT_DEMUX {
     )
     ch_versions = ch_versions.mix(DORADO_BASECALLER.out.versions)
 
-    DORADO_BASECALLER.out.called.view()
+    // Generate md5sum for basecalled bam
+    DORADO_BASECALLER.out.bams.view()
+    MD5SUM_BASECALL(
+        DORADO_BASECALLER.out.bams
+    )
 
     if (params.samplesheet) {
         /* 
@@ -46,17 +58,21 @@ workflow ONT_DEMUX {
         are removed together with the barcodes
         */
         DORADO_DEMUX(
-            DORADO_BASECALLER.out.called,
+            DORADO_BASECALLER.out.bams,
             file(params.samplesheet)
         )
         ch_versions = ch_versions.mix(DORADO_DEMUX.out.versions)
         ch_demuxed = DORADO_DEMUX.out.demuxed
+
+        MD5SUM_DEMUX(
+            DORADO_DEMUX.out.bams
+        )
     } else {
         ch_demuxed = DORADO_BASECALLER.out.called
     }
 
     // Get BAMs from basecalling output
-    ch_demuxed.map { _m,d ->
+    ch_demuxed.map { d ->
         bams_from_calls(d)
     }.flatMap { v -> v }
     .set { bams }
@@ -65,24 +81,25 @@ workflow ONT_DEMUX {
     bams.map { m, bam ->
         tuple(m.sample_id,m,bam)
     }.join(
-        INPUT_CHECK.out.meta.map { m -> 
+        ch_meta.map { m -> 
             [ m.sample_id, m]
         }, remainder: true
-    ).branch { _bc, _meta, _bam, ameta ->
+    ).branch { _s, _meta, _bam, ameta ->
         with_meta: ameta
         without_meta: !ameta
     }.set  { ch_bams_by_meta }
     
+    ch_bams_by_meta.without_meta.view()
     /* 
     Depending on whether a sample sheet was used, we now
     have either an extended meta hash or null - and for null,
     we need a meta hash with at least a sample_id ( = the barcode)
     */
-    ch_bams_by_meta.with_meta.map { _bc, _meta, bam, ameta ->
+    ch_bams_by_meta.with_meta.map { _s, _meta, bam, ameta ->
         [ ameta, bam ]
     }.set { ch_bams_with_sample }
 
-    ch_bams_by_meta.without_meta.map { _bc, m, bam, _ameta ->
+    ch_bams_by_meta.without_meta.map { _s, m, bam, _ameta ->
         def meta = [:]
         meta.barcode = m.sample_id
         meta.sample_id = m.sample_id
@@ -95,6 +112,11 @@ workflow ONT_DEMUX {
         ch_all_bams
     )
     ch_versions = ch_versions.mix(SAMTOOLS_FASTQ.out.versions)
+
+    MD5SUM_FASTQ(
+        SAMTOOLS_FASTQ.out.fastq.map{_m,f -> f} 
+    )
+    ch_versions = ch_versions.mix(MD5SUM_FASTQ.out.versions)
 
     // Read BAM file and compute summary
     DORADO_SUMMARY(

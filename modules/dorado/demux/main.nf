@@ -10,7 +10,8 @@ process DORADO_DEMUX {
     val(samplesheet)
 
     output:
-    path("demux"), emit: demuxed
+    path("bam_pass"), emit: demuxed
+    path("bam_pass/*/*.*am"), emit: bams
     path('versions.yml'), emit: versions
 
     script:
@@ -23,6 +24,8 @@ process DORADO_DEMUX {
     --output-dir demux \
     $options \
     $args $bam
+
+    find ./ -name bam_pass -exec cp -R {} . \\;
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -11,7 +11,8 @@ process DORADO_BASECALLER {
     val(duplex)
 
     output:
-    path("**/*.bam"), emit: called
+    path("bam_pass/*.bam"), emit: bams
+    path("bam_pass/"), emit: called
     path('versions.yml'), emit: versions
 
     script:
@@ -26,6 +27,8 @@ process DORADO_BASECALLER {
     --models-directory \$DRD_MODELS_PATH \
     -o basecalling \
     $args 
+
+    find ./ -name bam_pass -exec cp -R {} . \\;
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
