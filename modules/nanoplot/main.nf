@@ -13,7 +13,7 @@ process NANOPLOT {
     output:
     tuple val(meta), path('*.html')                , emit: html
     tuple val(meta), path('*.png') , optional: true, emit: png
-    tuple val(meta), path('*.txt')                 , emit: txt
+    tuple val(meta), path('*.NanoStats.txt')       , emit: txt
     tuple val(meta), path('*.log')                 , emit: log
     path  'versions.yml'                           , emit: versions
 

@@ -6,7 +6,7 @@ process MULTIQC {
         'quay.io/biocontainers/multiqc:1.21--pyhdfd78af_0' }"
 
     input:
-    path('*')
+    path('*', stageAs: '?/')
     path(multiqc_config)
     path(multiqc_logo)
 
